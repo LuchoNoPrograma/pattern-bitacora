@@ -50,20 +50,18 @@
 
       <div class="workspace-actions">
         <button id="clearPattern" class="button button-secondary" type="button" disabled>
-          <svg class="icon" aria-hidden="true"><use href="#icon-rotate-ccw"></use></svg>
-          Limpiar
+          <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+          Nuevo
         </button>
-        <label id="failedLabel" class="failed-control is-disabled">
-          <input id="failedCheck" type="checkbox" disabled>
-          <svg class="icon" aria-hidden="true"><use href="#icon-circle-x"></use></svg>
-          <span>Marcar: no funciono</span>
-        </label>
+        <button id="downloadPattern" class="button button-secondary" type="button" disabled>
+          <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg>
+          Guardar imagen
+        </button>
+        <button id="failedButton" class="failed-button" type="button" aria-pressed="false" disabled>
+          <svg class="icon" aria-hidden="true"><use href="#icon-circle-check"></use></svg>
+          <span id="failedButtonText">Marcar como fallido</span>
+        </button>
       </div>
-
-      <p class="device-note">
-        <svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg>
-        La cuadricula aplica la regla de Android: si una linea cruza un punto no usado, ese punto se agrega.
-      </p>
     </section>
 
     <aside class="history-panel" aria-labelledby="history-title">
@@ -72,7 +70,7 @@
           <h2 id="history-title">Intentos fallidos</h2>
           <p class="section-description">Toca uno para volver a verlo.</p>
         </div>
-        <span class="attempt-total"><strong id="attemptCount">0</strong> intentos</span>
+        <span class="attempt-total"><strong id="attemptCount">0</strong> <span id="attemptLabel">intentos</span></span>
       </div>
 
       <div class="history-actions">
@@ -81,10 +79,6 @@
           <span class="sr-only">Ocultar trazos</span>
         </button>
         <span class="toolbar-spacer"></span>
-        <button id="exportHistory" class="icon-button" type="button" disabled title="Exportar bitacora">
-          <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg>
-          <span class="sr-only">Exportar bitacora</span>
-        </button>
         <button id="clearHistory" class="icon-button icon-button-danger" type="button" disabled title="Borrar toda la bitacora">
           <svg class="icon" aria-hidden="true"><use href="#icon-trash-2"></use></svg>
           <span class="sr-only">Borrar toda la bitacora</span>
@@ -136,14 +130,11 @@
       <line x1="6" x2="6.01" y1="16" y2="16"></line>
       <line x1="10" x2="10.01" y1="16" y2="16"></line>
     </symbol>
-    <symbol id="icon-rotate-ccw" viewBox="0 0 24 24">
-      <path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path>
+    <symbol id="icon-plus" viewBox="0 0 24 24">
+      <path d="M5 12h14"></path><path d="M12 5v14"></path>
     </symbol>
-    <symbol id="icon-circle-x" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path>
-    </symbol>
-    <symbol id="icon-info" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path>
+    <symbol id="icon-circle-check" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path>
     </symbol>
     <symbol id="icon-eye" viewBox="0 0 24 24">
       <path d="M2.06 12.35a1 1 0 0 1 0-.7C3.7 7.6 7.65 5 12 5c4.35 0 8.3 2.6 9.94 6.65a1 1 0 0 1 0 .7C20.3 16.4 16.35 19 12 19c-4.35 0-8.3-2.6-9.94-6.65Z"></path>

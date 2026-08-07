@@ -13,7 +13,7 @@ manda los patrones a ningun servidor y tampoco necesita instalar nada.
 3. Cuando vuelvas a dibujar el mismo patron aparecera en rojo.
 
 Tambien puedes abrir un intento anterior, ocultar las miniaturas, borrar
-registros o descargar una copia de la bitacora.
+registros o guardar cualquier patron como una imagen PNG.
 
 Los iconos son de [Lucide](https://lucide.dev/) y estan incluidos directamente
 en la pagina para no cargar una libreria externa.
