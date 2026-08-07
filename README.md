@@ -1,7 +1,7 @@
 # Bitacora de patrones
 
-Me olvide el patron de un telefono y necesitaba anotar cuales ya habia probado.
-Hice esta pagina para dibujar cada candidato y marcarlo cuando no funciona.
+Me olvide el patron de mi celular y necesitaba anotar cuales ya habia probado.
+Hice esta pagina para dibujar cada candidato y marcarlo cuando no funciona xd.
 
 Los intentos quedan guardados en el navegador. La pagina no usa cuentas, no
 manda los patrones a ningun servidor y tampoco necesita instalar nada.
