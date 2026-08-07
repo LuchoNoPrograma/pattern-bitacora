@@ -39,13 +39,11 @@ input {
   font: inherit;
 }
 
-button,
-label {
+button {
   -webkit-tap-highlight-color: transparent;
 }
 
 button:focus-visible,
-label:has(input:focus-visible),
 .history-open:focus-visible {
   outline: 3px solid rgba(8, 119, 106, 0.22);
   outline-offset: 2px;
@@ -283,16 +281,17 @@ h2 {
   width: min(100%, 520px);
   margin: 14px auto 0;
   display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
+  grid-template-columns: 105px 180px minmax(0, 1fr);
   gap: 10px;
 }
 
 .button,
-.failed-control {
+.failed-button {
   min-height: 48px;
   border-radius: 6px;
   font-size: 0.84rem;
   font-weight: 720;
+  white-space: nowrap;
 }
 
 .button {
@@ -314,7 +313,7 @@ h2 {
 }
 
 .button:active:not(:disabled),
-.failed-control:active:not(.is-disabled) {
+.failed-button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
@@ -335,71 +334,52 @@ h2 {
   background: var(--danger-strong);
 }
 
-.failed-control {
-  padding: 0 18px;
-  display: flex;
+.failed-button {
+  padding: 0 16px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  border: 1px solid #e1a1a3;
+  gap: 9px;
+  border: 1px solid var(--danger);
+  border-radius: 6px;
   color: var(--danger);
-  background: var(--danger-soft);
+  background: var(--surface);
   cursor: pointer;
-  transition: opacity 140ms ease, border-color 140ms ease, background 140ms ease, transform 140ms ease;
+  transition: color 140ms ease, border-color 140ms ease, background 140ms ease, transform 140ms ease;
 }
 
-.failed-control:hover:not(.is-disabled) {
-  border-color: var(--danger);
-  background: #f9dfe0;
+.failed-button:hover:not(:disabled) {
+  color: var(--danger-strong);
+  border-color: var(--danger-strong);
+  background: var(--danger-soft);
 }
 
-.failed-control input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--danger);
-  cursor: inherit;
-}
-
-.failed-control .icon {
+.failed-button .icon {
   width: 17px;
   height: 17px;
 }
 
-.failed-control.is-disabled {
-  opacity: 0.43;
+.failed-button:disabled {
+  color: #9ca7a2;
+  border-color: var(--line);
+  background: var(--surface-subtle);
   cursor: not-allowed;
 }
 
-.failed-control.is-recorded {
-  opacity: 1;
+.failed-button.is-recorded {
+  color: #ffffff;
   border-color: var(--danger);
-  background: #f6d9da;
+  background: var(--danger);
   cursor: default;
-}
-
-.device-note {
-  width: min(100%, 520px);
-  margin: 13px auto 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 0.71rem;
-  line-height: 1.5;
-}
-
-.device-note .icon {
-  width: 15px;
-  height: 15px;
-  margin-top: 1px;
 }
 
 .history-panel {
   position: sticky;
   top: 22px;
-  padding-left: 30px;
-  border-left: 1px solid var(--line);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
 }
 
 .attempt-total {
@@ -421,13 +401,14 @@ h2 {
 }
 
 .history-actions {
-  min-height: 50px;
-  margin-top: 15px;
+  min-height: 46px;
+  margin-top: 16px;
+  padding: 4px;
   display: flex;
   align-items: center;
   gap: 6px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-subtle);
 }
 
 .toolbar-spacer {
@@ -469,7 +450,7 @@ h2 {
 }
 
 .empty-history {
-  min-height: 270px;
+  min-height: 230px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -506,9 +487,10 @@ h2 {
 }
 
 .history-list {
-  max-height: calc(100vh - 240px);
-  margin: 0;
-  padding: 0 4px 0 0;
+  max-height: calc(100vh - 250px);
+  margin: 12px 0 0;
+  padding: 0 3px 0 0;
+  display: block;
   overflow-y: auto;
   overscroll-behavior: contain;
   list-style: none;
@@ -517,24 +499,30 @@ h2 {
 }
 
 .history-item {
-  min-height: 92px;
+  min-height: 84px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 40px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  padding-right: 6px;
   border-bottom: 1px solid var(--line);
+  background: transparent;
   animation: history-in 180ms ease both;
-  transition: background 140ms ease;
+  transition: background 140ms ease, border-color 140ms ease;
 }
 
 .history-item.is-selected {
   background: var(--danger-soft);
 }
 
+.history-item:first-child {
+  border-top: 1px solid var(--line);
+}
+
 .history-open {
   min-width: 0;
-  min-height: 91px;
-  padding: 12px 4px;
+  min-height: 82px;
+  padding: 11px 8px;
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
   align-items: center;
@@ -548,7 +536,7 @@ h2 {
 }
 
 .history-open:hover {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface);
 }
 
 .history-preview-wrap {
@@ -575,7 +563,7 @@ h2 {
   height: 19px;
   display: grid;
   place-items: center;
-  border: 2px solid var(--page);
+  border: 2px solid var(--surface);
   border-radius: 50%;
   color: #ffffff;
   background: var(--danger);
@@ -603,7 +591,14 @@ h2 {
   font-size: 0.65rem;
 }
 
-.remove-attempt {
+.history-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.remove-attempt,
+.download-attempt {
   width: 36px;
   height: 36px;
   padding: 0;
@@ -621,7 +616,13 @@ h2 {
   background: #ffffff;
 }
 
-.remove-attempt .icon {
+.download-attempt:hover {
+  color: var(--accent);
+  background: #ffffff;
+}
+
+.remove-attempt .icon,
+.download-attempt .icon {
   width: 16px;
   height: 16px;
 }
@@ -731,9 +732,7 @@ h2 {
 
   .history-panel {
     position: static;
-    padding: 28px 0 0;
-    border-top: 1px solid var(--line);
-    border-left: 0;
+    padding: 18px;
   }
 
   .history-list {
@@ -791,11 +790,12 @@ h2 {
   }
 
   .workspace-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
-  .failed-control {
+  .failed-button {
     order: -1;
+    grid-column: 1 / -1;
   }
 
   .history-open {

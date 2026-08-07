@@ -9,12 +9,13 @@ const context = canvas.getContext("2d");
 const patternTool = document.querySelector(".pattern-tool");
 const statusElement = document.getElementById("patternStatus");
 const clearPatternButton = document.getElementById("clearPattern");
-const failedCheck = document.getElementById("failedCheck");
-const failedLabel = document.getElementById("failedLabel");
+const downloadPatternButton = document.getElementById("downloadPattern");
+const failedButton = document.getElementById("failedButton");
+const failedButtonText = document.getElementById("failedButtonText");
 const historyList = document.getElementById("historyList");
 const emptyHistory = document.getElementById("emptyHistory");
 const attemptCount = document.getElementById("attemptCount");
-const exportHistoryButton = document.getElementById("exportHistory");
+const attemptLabel = document.getElementById("attemptLabel");
 const clearHistoryButton = document.getElementById("clearHistory");
 const togglePrivacyButton = document.getElementById("togglePrivacy");
 const historyPanel = document.querySelector(".history-panel");
@@ -287,35 +288,34 @@ function updateCurrentPattern() {
   const isValid = sequence.length >= MIN_PATTERN_LENGTH;
 
   clearPatternButton.disabled = !hasPattern;
+  downloadPatternButton.disabled = !isValid;
 
   statusElement.className = "status";
-  failedLabel.className = "failed-control";
+  failedButton.className = "failed-button";
+  failedButton.setAttribute("aria-pressed", "false");
+  failedButtonText.textContent = "Marcar como fallido";
   patternTool.classList.remove("is-new", "is-tried");
 
   if (!hasPattern) {
     statusElement.classList.add("status-empty");
     statusElement.textContent = "Dibuja un patron";
-    failedCheck.checked = false;
-    failedCheck.disabled = true;
-    failedLabel.classList.add("is-disabled");
+    failedButton.disabled = true;
   } else if (!isValid) {
     statusElement.classList.add("status-warning");
     statusElement.textContent = `Faltan ${missingDots} ${missingDots === 1 ? "punto" : "puntos"}`;
-    failedCheck.checked = false;
-    failedCheck.disabled = true;
-    failedLabel.classList.add("is-disabled");
+    failedButton.disabled = true;
   } else if (attempted) {
     statusElement.classList.add("status-tried");
     statusElement.textContent = "Ya lo intentaste";
-    failedCheck.checked = true;
-    failedCheck.disabled = true;
-    failedLabel.classList.add("is-disabled", "is-recorded");
+    failedButton.disabled = true;
+    failedButton.setAttribute("aria-pressed", "true");
+    failedButtonText.textContent = "Intento registrado";
+    failedButton.classList.add("is-recorded");
     patternTool.classList.add("is-tried");
   } else {
     statusElement.classList.add("status-new");
     statusElement.textContent = "Patron nuevo";
-    failedCheck.checked = false;
-    failedCheck.disabled = false;
+    failedButton.disabled = false;
     patternTool.classList.add("is-new");
   }
 
@@ -345,7 +345,7 @@ function registerFailedAttempt() {
   attempts.unshift(attempt);
   if (!saveAttempts()) {
     attempts.shift();
-    failedCheck.checked = false;
+    updateCurrentPattern();
     return;
   }
 
@@ -371,6 +371,80 @@ function loadAttempt(attempt) {
   if (window.matchMedia("(max-width: 860px)").matches) {
     patternTool.scrollIntoView({ behavior: "smooth", block: "center" });
   }
+}
+
+function createPatternImage(pattern) {
+  const size = 1200;
+  const imageCanvas = document.createElement("canvas");
+  const imageContext = imageCanvas.getContext("2d");
+  const imageDots = getDots(size);
+  const lineColor = "#08776a";
+  const softColor = "rgba(8, 119, 106, 0.13)";
+
+  imageCanvas.width = size;
+  imageCanvas.height = size;
+  imageContext.fillStyle = "#ffffff";
+  imageContext.fillRect(0, 0, size, size);
+
+  imageContext.strokeStyle = lineColor;
+  imageContext.lineWidth = size * 0.011;
+  imageContext.lineCap = "round";
+  imageContext.lineJoin = "round";
+  imageContext.beginPath();
+  imageContext.moveTo(imageDots[pattern[0]].x, imageDots[pattern[0]].y);
+  pattern.slice(1).forEach((dotId) => {
+    imageContext.lineTo(imageDots[dotId].x, imageDots[dotId].y);
+  });
+  imageContext.stroke();
+
+  pattern.slice(0, -1).forEach((dotId, index) => {
+    drawDirectionChevron(
+      imageContext,
+      imageDots[dotId],
+      imageDots[pattern[index + 1]],
+      lineColor,
+      size * 0.015,
+      index % 2 === 0 ? 0.63 : 0.7,
+    );
+  });
+
+  imageDots.forEach((dot) => {
+    const active = pattern.includes(dot.id);
+    imageContext.beginPath();
+    imageContext.arc(dot.x, dot.y, size * 0.041, 0, Math.PI * 2);
+    imageContext.fillStyle = active ? softColor : "#f0f3f2";
+    imageContext.fill();
+
+    imageContext.beginPath();
+    imageContext.arc(dot.x, dot.y, size * 0.014, 0, Math.PI * 2);
+    imageContext.fillStyle = active ? lineColor : "#6d7874";
+    imageContext.fill();
+  });
+
+  return imageCanvas;
+}
+
+function downloadPatternImage(pattern) {
+  if (!Array.isArray(pattern) || pattern.length < MIN_PATTERN_LENGTH) return;
+
+  const imageCanvas = createPatternImage(pattern);
+  imageCanvas.toBlob((blob) => {
+    if (!blob) {
+      showToast("No se pudo crear la imagen.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const timestamp = new Date().toISOString().slice(0, 16).replace("T", "-").replace(":", "-");
+    link.href = url;
+    link.download = `patron-${timestamp}.png`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Imagen guardada.");
+  }, "image/png");
 }
 
 function drawMiniPattern(preview, pattern) {
@@ -465,10 +539,22 @@ function createHistoryItem(attempt, index) {
   removeButton.addEventListener("click", () => removeAttempt(attempt.id));
   removeButton.append(createIcon("trash-2"));
 
+  const downloadButton = document.createElement("button");
+  downloadButton.className = "download-attempt";
+  downloadButton.type = "button";
+  downloadButton.title = "Guardar imagen";
+  downloadButton.setAttribute("aria-label", `Guardar imagen del intento ${attempts.length - index}`);
+  downloadButton.addEventListener("click", () => downloadPatternImage(attempt.sequence));
+  downloadButton.append(createIcon("download"));
+
+  const itemActions = document.createElement("div");
+  itemActions.className = "history-item-actions";
+  itemActions.append(downloadButton, removeButton);
+
   copy.append(title, time);
   previewWrap.append(preview, failedBadge);
   openButton.append(previewWrap, copy);
-  item.append(openButton, removeButton);
+  item.append(openButton, itemActions);
 
   requestAnimationFrame(() => drawMiniPattern(preview, attempt.sequence));
   return item;
@@ -484,7 +570,7 @@ function renderHistory() {
   emptyHistory.hidden = hasAttempts;
   historyList.hidden = !hasAttempts;
   attemptCount.textContent = String(attempts.length);
-  exportHistoryButton.disabled = !hasAttempts;
+  attemptLabel.textContent = attempts.length === 1 ? "intento" : "intentos";
   clearHistoryButton.disabled = !hasAttempts;
   updateHistorySelection();
 }
@@ -494,29 +580,6 @@ function updateHistorySelection() {
   historyList.querySelectorAll(".history-item").forEach((item) => {
     item.classList.toggle("is-selected", Boolean(key) && item.dataset.patternKey === key);
   });
-}
-
-function exportHistory() {
-  if (attempts.length === 0) return;
-
-  const exportData = {
-    exportedAt: new Date().toISOString(),
-    attempts: attempts.map((attempt) => ({
-      sequence: attempt.sequence.map((value) => value + 1),
-      createdAt: attempt.createdAt,
-    })),
-  };
-
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `bitacora-patrones-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-  showToast("Bitacora exportada.");
 }
 
 function clearAllAttempts() {
@@ -566,10 +629,8 @@ canvas.addEventListener("pointermove", moveDrawing);
 canvas.addEventListener("pointerup", endDrawing);
 canvas.addEventListener("pointercancel", endDrawing);
 clearPatternButton.addEventListener("click", resetCurrentPattern);
-failedCheck.addEventListener("change", () => {
-  if (failedCheck.checked) registerFailedAttempt();
-});
-exportHistoryButton.addEventListener("click", exportHistory);
+downloadPatternButton.addEventListener("click", () => downloadPatternImage(sequence));
+failedButton.addEventListener("click", registerFailedAttempt);
 clearHistoryButton.addEventListener("click", clearAllAttempts);
 togglePrivacyButton.addEventListener("click", togglePrivacy);
 clearDialog.addEventListener("close", () => {
